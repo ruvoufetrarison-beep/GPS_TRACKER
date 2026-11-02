@@ -1,0 +1,10 @@
+{
+  "name": "GPS_TRACKER",
+  "application_id": "com.fanofeno.gpstracker",
+  "language": "Kotlin",
+  "minimum_android_api": 26,
+  "location_interval_minutes": 5,
+  "backend": "Supabase",
+  "dashboard": "Leaflet + OpenStreetMap",
+  "build": "GitHub Actions"
+}
