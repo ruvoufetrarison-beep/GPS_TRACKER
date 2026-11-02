@@ -54,9 +54,10 @@ object Api {
  fun upload(ctx:Context,point:JSONObject):Boolean {
   return try {
    val p=ctx.getSharedPreferences("gps_session",Context.MODE_PRIVATE)
-   var access=p.getString("access_token",null)
-   if(access==null){AppLog.write(ctx,"ERROR","Tsy misy access token; tsy afaka mandefa GPS.");false}
+   val initial=p.getString("access_token",null)
+   if(initial==null){AppLog.write(ctx,"ERROR","Tsy misy access token; tsy afaka mandefa GPS.");false}
    else {
+    var access:String=initial
     val rt=p.getString("refresh_token",null)
     fun send(token:String)=request("/rest/v1/gps_locations","POST",point.toString(),token,mapOf("Prefer" to "return=minimal","Content-Profile" to "public"))
     var result=send(access)
