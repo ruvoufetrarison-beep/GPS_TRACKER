@@ -51,5 +51,25 @@ object Api {
    else{AppLog.write(ctx,"ERROR","Test HTTP ${response.first}: ${response.second}");Result(false,"HTTP ${response.first}: ${error(response.second,"Tsy nahomby")}") }
   }catch(e:Exception){AppLog.write(ctx,"ERROR","Supabase test: ${e.message}");Result(false,"Tsy afaka nifandray: ${e.message}")}
  }
+ fun upload(ctx:Context,point:JSONObject):Boolean {
+  return try {
+   val p=ctx.getSharedPreferences("gps_session",Context.MODE_PRIVATE)
+   var access=p.getString("access_token",null)
+   if(access==null){AppLog.write(ctx,"ERROR","Tsy misy access token; tsy afaka mandefa GPS.");false}
+   else {
+    val rt=p.getString("refresh_token",null)
+    fun send(token:String)=request("/rest/v1/gps_locations","POST",point.toString(),token,mapOf("Prefer" to "return=minimal","Content-Profile" to "public"))
+    var result=send(access)
+    if(result.first==401 && rt!=null){
+     AppLog.write(ctx,"WARN","Manavao session lany daty.")
+     val s=refresh(rt);access=s.getString("access_token")
+     p.edit().putString("access_token",access).putString("refresh_token",s.optString("refresh_token",rt)).apply()
+     result=send(access)
+    }
+    if(result.first in 200..299){AppLog.write(ctx,"INFO","GPS nalefa Supabase HTTP ${result.first}.");true}
+    else{AppLog.write(ctx,"ERROR","Upload HTTP ${result.first}: ${result.second}");false}
+   }
+  }catch(e:Exception){AppLog.write(ctx,"ERROR","Upload exception ${e.javaClass.simpleName}: ${e.message}");false}
+ }
  private fun error(body:String,fallback:String):String=try{val j=JSONObject(body);j.optString("msg",j.optString("message",j.optString("error_description",fallback)))}catch(_:Exception){if(body.isBlank())fallback else body}
 }
